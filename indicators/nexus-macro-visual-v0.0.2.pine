@@ -1,0 +1,81 @@
+// © 2026 Nexus Macro Trader (v0.0.2)
+// @version=6
+indicator("Nexus Macro Visual [v0.0.2]", shorttitle="NMT v0.0.2", overlay=true, max_lines_count=500, max_labels_count=500, max_boxes_count=500)
+
+// =============================================================================
+// 🛠 AYARLAR (Kullanıcı Tarafından Özelleştirilebilir)
+// =============================================================================
+var G1 = "Strateji Parametreleri"
+int pivot_len    = input.int(15, "Sinyal Hassasiyeti (Pivot)", minval=1, group=G1)
+float rr1        = input.float(1.0, "TP1 Oranı (Risk/Ödül)", group=G1)
+float rr2        = input.float(2.0, "TP2 Oranı (Risk/Ödül)", group=G1)
+float rr3        = input.float(3.0, "TP3 Oranı (Risk/Ödül)", group=G1)
+
+var G2 = "Görsel Özelleştirme"
+color long_col   = input.color(color.new(#00ff00, 0), "Alış Rengi", group=G2)
+color short_col  = input.color(color.new(#ff0000, 0), "Satış Rengi", group=G2)
+int line_length  = input.int(20, "Çizgi Uzunluğu (Bar)", minval=5, group=G2)
+bool show_labels = input.bool(true, "Fiyat Etiketlerini Göster", group=G2)
+
+// =============================================================================
+// 🔍 ANALİZ MANTIĞI (Repaint Yapmaz - Sabit Sinyal)
+// =============================================================================
+// Pivot noktaları, sağında ve solunda belirlenen bar sayısı kadar tepe/dip arar.
+// Bu sayede sinyal oluştuktan sonra fiyat ne yaparsa yapsın yer değiştirmez.
+float ph = ta.pivothigh(high, pivot_len, pivot_len)
+float pl = ta.pivotlow(low, pivot_len, pivot_len)
+float atr = ta.atr(14) // Oynaklığa göre giriş mesafesi belirlemek için ATR
+
+// =============================================================================
+// 🎨 GÖRSELLEŞTİRME VE ÇİZİMLER
+// =============================================================================
+
+// --- SATIŞ (SHORT) KURULUMU ---
+if not na(ph)
+    float stopLoss = ph
+    float entry    = ph - (atr * 0.5) // ATR'ye göre giriş seviyesi
+    float risk     = math.abs(stopLoss - entry)
+    float tp1      = entry - (risk * rr1)
+    float tp2      = entry - (risk * rr2)
+    float tp3      = entry - (risk * rr3)
+    
+    // 1. Tepe Noktası Kutusu
+    box.new(bar_index[pivot_len]-1, high[pivot_len], bar_index[pivot_len]+1, low[pivot_len], 
+             border_color=short_col, bgcolor=color.new(short_col, 80))
+
+    // 2. İşlem Seviyeleri (Çizgiler)
+    line.new(bar_index[pivot_len], stopLoss, bar_index + line_length, stopLoss, color=short_col, width=2)
+    line.new(bar_index[pivot_len], entry, bar_index + line_length, entry, color=color.gray, width=2)
+    line.new(bar_index[pivot_len], tp1, bar_index + line_length, tp1, color=color.orange, width=1, style=line.style_dashed)
+    line.new(bar_index[pivot_len], tp3, bar_index + line_length, tp3, color=color.orange, width=1, style=line.style_dashed)
+
+    // 3. Bilgilendirme Etiketleri
+    if show_labels
+        label.new(bar_index + line_length, stopLoss, "SL: " + str.tostring(stopLoss, format.mintick), style=label.style_label_left, color=na, textcolor=short_col, size=size.small)
+        label.new(bar_index + line_length, entry, "ENTRY: " + str.tostring(entry, format.mintick), style=label.style_label_left, color=na, textcolor=color.gray, size=size.small)
+        label.new(bar_index + line_length, tp3, "TP3: " + str.tostring(tp3, format.mintick), style=label.style_label_left, color=na, textcolor=color.orange, size=size.small)
+
+// --- ALIŞ (LONG) KURULUMU ---
+if not na(pl)
+    float stopLoss = pl
+    float entry    = pl + (atr * 0.5)
+    float risk     = math.abs(entry - stopLoss)
+    float tp1      = entry + (risk * rr1)
+    float tp2      = entry + (risk * rr2)
+    float tp3      = entry + (risk * rr3)
+
+    // 1. Dip Noktası Kutusu
+    box.new(bar_index[pivot_len]-1, high[pivot_len], bar_index[pivot_len]+1, low[pivot_len], 
+             border_color=long_col, bgcolor=color.new(long_col, 80))
+
+    // 2. İşlem Seviyeleri (Çizgiler)
+    line.new(bar_index[pivot_len], stopLoss, bar_index + line_length, stopLoss, color=color.red, width=2)
+    line.new(bar_index[pivot_len], entry, bar_index + line_length, entry, color=long_col, width=2)
+    line.new(bar_index[pivot_len], tp1, bar_index + line_length, tp1, color=color.orange, width=1, style=line.style_dashed)
+    line.new(bar_index[pivot_len], tp3, bar_index + line_length, tp3, color=color.orange, width=1, style=line.style_dashed)
+
+    // 3. Bilgilendirme Etiketleri
+    if show_labels
+        label.new(bar_index + line_length, stopLoss, "SL: " + str.tostring(stopLoss, format.mintick), style=label.style_label_left, color=na, textcolor=color.red, size=size.small)
+        label.new(bar_index + line_length, entry, "ENTRY: " + str.tostring(entry, format.mintick), style=label.style_label_left, color=na, textcolor=long_col, size=size.small)
+        label.new(bar_index + line_length, tp3, "TP3: " + str.tostring(tp3, format.mintick), style=label.style_label_left, color=na, textcolor=color.orange, size=size.small)
