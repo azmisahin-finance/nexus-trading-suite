@@ -1,0 +1,115 @@
+// © 2025 Nexus Macro Trader (v0.0.1)
+// @version=6
+indicator("Nexus Macro Trader (v0.0.1)", shorttitle="NMT v0.0.1", overlay=true)
+
+// =============================================================================
+//                                  AYARLAR
+// =============================================================================
+var G1 = "Kurulum Ayarları"
+int lookback_period = input.int(100, "Büyük Tepe/Dip için Geriye Bakma Periyodu", group=G1)
+float risk_reward_1 = input.float(1.0, "TP1 Risk/Ödül Oranı", group=G1)
+float risk_reward_2 = input.float(2.0, "TP2 Risk/Ödül Oranı", group=G1)
+float risk_reward_3 = input.float(3.0, "TP3 Risk/Ödül Oranı", group=G1)
+
+// =============================================================================
+//                               ÇİZİM YÖNETİMİ
+// =============================================================================
+// Tüm çizim objelerini saklamak için "depo" (array) oluşturuyoruz.
+// Bu, profesyonel ve hatasız bir yönetim sağlar.
+var array<line> lines_array = array.new<line>()
+var array<label> labels_array = array.new<label>()
+var array<box> box_array = array.new<box>()
+
+// Bu fonksiyon, yeni bir sinyal geldiğinde eski çizimleri temizler.
+clear_all_drawings() =>
+    for item in lines_array
+        line.delete(item)
+    for item in labels_array
+        label.delete(item)
+    for item in box_array
+        box.delete(item)
+    array.clear(lines_array)
+    array.clear(labels_array)
+    array.clear(box_array)
+
+// =============================================================================
+//                                 ANA MANTIK
+// =============================================================================
+// 1. Son "büyük" tepe ve dibi bul.
+float highest_high = ta.highest(high, lookback_period)
+float lowest_low = ta.lowest(low, lookback_period)
+
+// 2. Bu tepe ve dibin tam olarak hangi barda oluştuğunu bul.
+int high_bar_index_offset = ta.highestbars(high, lookback_period)[0]
+int low_bar_index_offset = ta.lowestbars(low, lookback_period)[0]
+
+// 3. Bulunan en son "büyük" tepe ve dibi hafızada tutmak için değişkenler.
+// 'var' sayesinde bu değerler script çalıştığı sürece hafızada kalır.
+var float major_high = na
+var float major_low = na
+var int major_high_bar = na
+var int major_low_bar = na
+
+// 4. Yeni bir "büyük" tepe veya dip oluşup oluşmadığını kontrol et.
+bool new_major_high = na(major_high) or highest_high > major_high
+bool new_major_low = na(major_low) or lowest_low < major_low
+
+// 5. Eğer yeni bir "büyük" yapı oluştuysa, çizim yap.
+if new_major_high or new_major_low
+    clear_all_drawings() // Önce ekranı temizle.
+
+    // YENİ BİR BÜYÜK TEPE BULUNDU: SHORT KURULUMU
+    if new_major_high
+        // Yeni tepeyi hafızaya kaydet.
+        major_high := highest_high
+        major_high_bar := bar_index + high_bar_index_offset
+        major_low := na // Artık dip kurulumu geçersiz, hafızayı temizle.
+        
+        // Seviyeleri hesapla
+        float stopLoss = major_high
+        float entryPoint = stopLoss - ta.atr(14) 
+        float risk = stopLoss - entryPoint
+        float takeProfit1 = entryPoint - risk * risk_reward_1
+        float takeProfit2 = entryPoint - risk * risk_reward_2
+        float takeProfit3 = entryPoint - risk * risk_reward_3
+
+        // Çizimleri oluştur ve depoya ekle
+        array.push(box_array, box.new(major_high_bar, high[bar_index - major_high_bar] + ta.tr, major_high_bar + 1, low[bar_index - major_high_bar] - ta.tr, border_color=na, bgcolor=color.new(color.red, 85)))
+        array.push(lines_array, line.new(major_high_bar, stopLoss, bar_index + 20, stopLoss, color=color.red, width=2))
+        array.push(lines_array, line.new(major_high_bar, entryPoint, bar_index + 20, entryPoint, color=color.green, width=2))
+        array.push(lines_array, line.new(major_high_bar, takeProfit1, bar_index + 20, takeProfit1, color=color.orange, width=1))
+        array.push(lines_array, line.new(major_high_bar, takeProfit2, bar_index + 20, takeProfit2, color=color.orange, width=1))
+        array.push(lines_array, line.new(major_high_bar, takeProfit3, bar_index + 20, takeProfit3, color=color.orange, width=1))
+        array.push(labels_array, label.new(bar_index + 20, stopLoss, "Short Stop " + str.tostring(stopLoss, '#.##'), color=na, textcolor=color.red, style=label.style_label_left))
+        array.push(labels_array, label.new(bar_index + 20, entryPoint, "Short Entry " + str.tostring(entryPoint, '#.##'), color=na, textcolor=color.green, style=label.style_label_left))
+        array.push(labels_array, label.new(bar_index + 20, takeProfit1, "Tp1 " + str.tostring(takeProfit1, '#.##'), color=na, textcolor=color.orange, style=label.style_label_left))
+        array.push(labels_array, label.new(bar_index + 20, takeProfit2, "Tp2 " + str.tostring(takeProfit2, '#.##'), color=na, textcolor=color.orange, style=label.style_label_left))
+        array.push(labels_array, label.new(bar_index + 20, takeProfit3, "Tp3 " + str.tostring(takeProfit3, '#.##'), color=na, textcolor=color.orange, style=label.style_label_left))
+
+    // YENİ BİR BÜYÜK DİP BULUNDU: LONG KURULUMU
+    if new_major_low
+        // Yeni dibi hafızaya kaydet.
+        major_low := lowest_low
+        major_low_bar := bar_index + low_bar_index_offset
+        major_high := na // Artık tepe kurulumu geçersiz, hafızayı temizle.
+        
+        // Seviyeleri hesapla
+        float stopLoss = major_low
+        float entryPoint = stopLoss + ta.atr(14)
+        float risk = entryPoint - stopLoss
+        float takeProfit1 = entryPoint + risk * risk_reward_1
+        float takeProfit2 = entryPoint + risk * risk_reward_2
+        float takeProfit3 = entryPoint + risk * risk_reward_3
+
+        // Çizimleri oluştur ve depoya ekle
+        array.push(box_array, box.new(major_low_bar, high[bar_index - major_low_bar] + ta.tr, major_low_bar + 1, low[bar_index - major_low_bar] - ta.tr, border_color=na, bgcolor=color.new(color.green, 85)))
+        array.push(lines_array, line.new(major_low_bar, stopLoss, bar_index + 20, stopLoss, color=color.red, width=2))
+        array.push(lines_array, line.new(major_low_bar, entryPoint, bar_index + 20, entryPoint, color=color.blue, width=2))
+        array.push(lines_array, line.new(major_low_bar, takeProfit1, bar_index + 20, takeProfit1, color=color.orange, width=1))
+        array.push(lines_array, line.new(major_low_bar, takeProfit2, bar_index + 20, takeProfit2, color=color.orange, width=1))
+        array.push(lines_array, line.new(major_low_bar, takeProfit3, bar_index + 20, takeProfit3, color=color.orange, width=1))
+        array.push(labels_array, label.new(bar_index + 20, stopLoss, "Long Stop " + str.tostring(stopLoss, '#.##'), color=na, textcolor=color.red, style=label.style_label_left))
+        array.push(labels_array, label.new(bar_index + 20, entryPoint, "Long Entry " + str.tostring(entryPoint, '#.##'), color=na, textcolor=color.blue, style=label.style_label_left))
+        array.push(labels_array, label.new(bar_index + 20, takeProfit1, "Tp1 " + str.tostring(takeProfit1, '#.##'), color=na, textcolor=color.orange, style=label.style_label_left))
+        array.push(labels_array, label.new(bar_index + 20, takeProfit2, "Tp2 " + str.tostring(takeProfit2, '#.##'), color=na, textcolor=color.orange, style=label.style_label_left))
+        array.push(labels_array, label.new(bar_index + 20, takeProfit3, "Tp3 " + str.tostring(takeProfit3, '#.##'), color=na, textcolor=color.orange, style=label.style_label_left))
