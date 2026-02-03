@@ -1,0 +1,32 @@
+// © 2025 Nexus Macro Pro
+// @version=6
+indicator("Nexus Macro Pro", overlay=true, max_lines_count=500, max_labels_count=500)
+
+// --- Ayarlar ---
+int p_len = input.int(10, "Onay Bar Sayısı (Sol/Sağ)", minval=2)
+float rr_ratio = input.float(2.0, "Risk/Ödül Oranı")
+
+// --- Pivot Hesaplama (Sabit Sinyal) ---
+float ph = ta.pivothigh(high, p_len, p_len)
+float pl = ta.pivotlow(low, p_len, p_len)
+
+// --- Sinyal Çizim Mantığı ---
+if not na(ph)
+    float atr = ta.atr(14)
+    float entry = ph
+    float stop = entry + atr
+    float tp = entry - (math.abs(entry - stop) * rr_ratio)
+    
+    line.new(bar_index[p_len], entry, bar_index, entry, color=color.red, width=2)
+    label.new(bar_index[p_len], entry, "SHORT SETUP", color=color.red, textcolor=color.white, style=label.style_label_down)
+    line.new(bar_index, tp, bar_index + 10, tp, color=color.green, width=1, style=line.style_dotted)
+
+if not na(pl)
+    float atr = ta.atr(14)
+    float entry = pl
+    float stop = entry - atr
+    float tp = entry + (math.abs(entry - stop) * rr_ratio)
+    
+    line.new(bar_index[p_len], entry, bar_index, entry, color=color.blue, width=2)
+    label.new(bar_index[p_len], entry, "LONG SETUP", color=color.blue, textcolor=color.white, style=label.style_label_up)
+    line.new(bar_index, tp, bar_index + 10, tp, color=color.green, width=1, style=line.style_dotted)
