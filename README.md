@@ -1,17 +1,19 @@
-# Nexus Algorithmic Trading Suite 📈
+# Nexus Algorithmic Trading Suite 🚀
 
-Bu depo, Pine Script V6 tabanlı kurumsal düzeyde işlem araçlarını içerir. Projenin temel amacı, piyasadaki manipülatif hareketleri (repainting) eleyerek en saf fiyat hareketlerini (Price Action) yakalamaktır.
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Pine Script: V6](https://img.shields.io/badge/Pine%20Script-V6-blue)
 
-## 🚀 Özellikler
-- **Anti-Repaint Engine:** Sinyaller pivot onayıyla sabitlenir, geçmişte yer değiştirmez.
-- **Dynamic Risk Management:** Her işlem için ATR tabanlı Stop-Loss ve TP noktaları.
-- **V6 Architecture:** TradingView'in en güncel Pine Script motoru ile uyumlu.
+Bu depo, **azmisahin-finance** bünyesinde geliştirilen, gelişmiş fiyat hareketi (Price Action) algoritmalarını içerir. 
 
-## 📁 Dosyalar
-- `/indicators`: Görsel analiz ve sinyal araçları.
-- `/strategies`: Al-sat performans testleri.
+## 🛠 Proje İçeriği
+Bu suite, iki farklı yaklaşımı birleştirir:
+1. **Visual Tracker (V1):** Piyasadaki en son majör tepe/dip noktalarına odaklanan dinamik görselleştirme aracı.
+2. **Professional Engine (Fixed):** Repaint (yeniden boyama) yapmayan, geçmişe dönük doğruluğu yüksek sinyal üretici.
 
-## 🛠 Kurulum
-1. Pine Editor'ü TradingView'de açın.
-2. Buradaki `.ps` dosyalarından birini kopyalayıp yapıştırın.
-3. 'Add to Chart' (Grafiğe Ekle) butonuna tıklayın.
+## 📁 Dosyalar ve Kullanım
+- **`indicators/Nexus_Macro_V1.ps`**: "Real-time" analiz için idealdir.
+- **`indicators/Nexus_Macro_Pro.ps`**: Pivot-based sabit sinyal üreticisi.
+- **`strategies/Nexus_Backtest_V1.ps`**: Strateji performans raporu için kullanılır.
+
+## 💻 Web Entegrasyonu
+Bu repodaki kodlar, TradingView Pine Editor üzerinden doğrudan kullanılabilir veya web tabanlı dashboard projelerimize kaynak sağlar.
