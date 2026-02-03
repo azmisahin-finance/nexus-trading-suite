@@ -1,0 +1,56 @@
+// © 2025 Nexus Macro Trader (Visual Edition)
+// @version=6
+indicator("Nexus Macro Visual", shorttitle="NMT Visual", overlay=true)
+
+// --- Ayarlar ---
+var G1 = "Kurulum Ayarları"
+lookback_period = input.int(100, "Geriye Bakma Periyodu", group=G1)
+rr1 = input.float(1.0, "TP1 Oranı", group=G1)
+rr2 = input.float(2.0, "TP2 Oranı", group=G1)
+rr3 = input.float(3.0, "TP3 Oranı", group=G1)
+
+// --- Çizim Deposu ---
+var array<line> lines_array = array.new<line>()
+var array<label> labels_array = array.new<label>()
+var array<box> box_array = array.new<box>()
+
+clear_drawings() =>
+    for l in lines_array => line.delete(l)
+    for lb in labels_array => label.delete(lb)
+    for b in box_array => box.delete(b)
+    array.clear(lines_array)
+    array.clear(labels_array)
+    array.clear(box_array)
+
+// --- Ana Mantık ---
+float h_high = ta.highest(high, lookback_period)
+float l_low = ta.lowest(low, lookback_period)
+int h_index = ta.highestbars(high, lookback_period)
+int l_index = ta.lowestbars(low, lookback_period)
+
+var float m_high = na
+var float m_low = na
+
+bool new_h = na(m_high) or h_high > m_high
+bool new_l = na(m_low) or l_low < m_low
+
+if new_h or new_l
+    clear_drawings()
+    atr = ta.atr(14)
+    
+    if new_h
+        m_high := h_high
+        m_low := na
+        entry = m_high - atr
+        // Çizimleri buraya ekle (Kutular, Çizgiler vb.)
+        array.push(box_array, box.new(bar_index + h_index, high, bar_index + h_index + 1, low, bgcolor=color.new(color.red, 85)))
+        array.push(lines_array, line.new(bar_index + h_index, entry, bar_index + 20, entry, color=color.green, width=2))
+        array.push(labels_array, label.new(bar_index + 20, entry, "Short Entry", style=label.style_label_left, textcolor=color.green))
+
+    if new_l
+        m_low := l_low
+        m_high := na
+        entry = m_low + atr
+        array.push(box_array, box.new(bar_index + l_index, high, bar_index + l_index + 1, low, bgcolor=color.new(color.green, 85)))
+        array.push(lines_array, line.new(bar_index + l_index, entry, bar_index + 20, entry, color=color.blue, width=2))
+        array.push(labels_array, label.new(bar_index + 20, entry, "Long Entry", style=label.style_label_left, textcolor=color.blue))
