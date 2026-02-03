@@ -1,19 +1,27 @@
 # Nexus Algorithmic Trading Suite 🚀
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Pine Script: V6](https://img.shields.io/badge/Pine%20Script-V6-blue)
+![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+![Pine Script: V6](https://img.shields.io/badge/Pine%20Script-V6-orange)
 
-Bu depo, **azmisahin-finance** bünyesinde geliştirilen, gelişmiş fiyat hareketi (Price Action) algoritmalarını içerir. 
+**azmisahin-finance** tarafından geliştirilen, kurumsal düzeyde piyasa yapısı analizi ve algoritmik işlem araçları.
 
-## 🛠 Proje İçeriği
-Bu suite, iki farklı yaklaşımı birleştirir:
-1. **Visual Tracker (V1):** Piyasadaki en son majör tepe/dip noktalarına odaklanan dinamik görselleştirme aracı.
-2. **Professional Engine (Fixed):** Repaint (yeniden boyama) yapmayan, geçmişe dönük doğruluğu yüksek sinyal üretici.
+## 🛠 Proje Bileşenleri
 
-## 📁 Dosyalar ve Kullanım
-- **`indicators/Nexus_Macro_V1.ps`**: "Real-time" analiz için idealdir.
-- **`indicators/Nexus_Macro_Pro.ps`**: Pivot-based sabit sinyal üreticisi.
-- **`strategies/Nexus_Backtest_V1.ps`**: Strateji performans raporu için kullanılır.
+### 1. Indicators (`/indicators`)
+* **Nexus Macro Visual:** En güncel piyasa yapısını (Market Structure) kutular ve dinamik çizgilerle görselleştirir. Real-time analiz için optimize edilmiştir.
+* **Nexus Macro Pro:** Pivot noktalarını temel alan, "Repaint" (yeniden boyama) yapmayan, geçmişe dönük sinyal doğruluğu yüksek profesyonel sürüm.
 
-## 💻 Web Entegrasyonu
-Bu repodaki kodlar, TradingView Pine Editor üzerinden doğrudan kullanılabilir veya web tabanlı dashboard projelerimize kaynak sağlar.
+### 2. Strategies (`/strategies`)
+* **Nexus Strategy V1:** Görsel sinyalleri matematiksel verilere döker. TradingView Strateji Test Edici üzerinden performans raporu (Profit Factor, Drawdown vb.) almanızı sağlar.
+
+## 🚀 Kurulum ve Kullanım
+1. Bu depodaki istediğiniz `.ps` dosyasını açın ve kodun tamamını kopyalayın.
+2. [TradingView](https://www.tradingview.com) üzerinde bir grafik açın.
+3. Alt panelde bulunan **Pine Editor** sekmesine tıklayın.
+4. Kopyaladığınız kodu yapıştırın ve **Grafiğe Ekle (Add to Chart)** butonuna basın.
+
+## ⚖️ Lisans
+Bu proje **Apache License 2.0** ile lisanslanmıştır. Detaylar için `LICENSE` dosyasına bakabilirsiniz.
+
+---
+Developed by [Azmi Sahin Finance](https://github.com/azmisahin-finance)
