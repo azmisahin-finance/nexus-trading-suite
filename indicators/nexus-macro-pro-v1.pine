@@ -1,0 +1,16 @@
+//@version=6
+// © azmisahin-finance
+indicator("Nexus Macro Pro [V1]", overlay=true, max_lines_count=500)
+
+// Pivot Mantığı (Repaint Yapmaz)
+p_len = input.int(10, "Onay Barı")
+ph = ta.pivothigh(high, p_len, p_len)
+pl = ta.pivotlow(low, p_len, p_len)
+
+if not na(ph)
+    line.new(bar_index[p_len], ph, bar_index, ph, color=color.red, width=2)
+    label.new(bar_index[p_len], ph, "SHORT", color=color.red, textcolor=color.white)
+
+if not na(pl)
+    line.new(bar_index[p_len], pl, bar_index, pl, color=color.blue, width=2)
+    label.new(bar_index[p_len], pl, "LONG", color=color.blue, textcolor=color.white)
