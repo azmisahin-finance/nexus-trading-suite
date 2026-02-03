@@ -1,0 +1,15 @@
+//@version=6
+// © azmisahin-finance
+indicator("Nexus Macro Visual [V1]", overlay=true)
+
+// Ayarlar
+lookback = input.int(100, "Geriye Bakma Periyodu")
+atr_len = input.int(14, "ATR Periyodu")
+
+// Hesaplama
+h = ta.highest(high, lookback)
+l = ta.lowest(low, lookback)
+
+// Görselleştirme (Kutular ve Çizgiler)
+plot(h, "Üst Sınır", color.red, 2, plot.style_linebr)
+plot(l, "Alt Sınır", color.green, 2, plot.style_linebr)
