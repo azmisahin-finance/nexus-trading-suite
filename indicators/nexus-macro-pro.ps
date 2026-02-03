@@ -1,29 +1,21 @@
-// © 2025 Nexus Macro Pro (Fixed Version)
+// © 2025 Nexus Macro Trader (Pro Edition - Anti-Repaint)
 // @version=6
-indicator("Nexus Macro Pro (Fixed)", overlay=true, max_lines_count=500, max_labels_count=500)
+indicator("Nexus Macro Pro", overlay=true, max_lines_count=500, max_labels_count=500)
 
-// --- Kullanıcı Girişleri ---
-int p_len = input.int(10, "Onay Bar Sayısı (Sol/Sağ)", minval=2, help="Bir tepenin sabitlenmesi için gereken bar sayısı.")
-float rr_ratio = input.float(2.0, "Risk/Ödül Oranı")
+int p_len = input.int(10, "Pivot Onay Barı")
+float rr = input.float(2.0, "Risk/Ödül")
 
-// --- Pivot Algoritması (Repaint Engelleme) ---
-float ph = ta.pivothigh(high, p_len, p_len)
-float pl = ta.pivotlow(low, p_len, p_len)
+ph = ta.pivothigh(high, p_len, p_len)
+pl = ta.pivotlow(low, p_len, p_len)
 
-// --- Sinyal Fonksiyonu ---
-f_draw_trade(_is_long, _price) =>
-    _c = _is_long ? color.blue : color.red
-    _atr = ta.atr(14)
-    _stop = _is_long ? _price - _atr : _price + _atr
-    _tp = _is_long ? _price + (math.abs(_price - _stop) * rr_ratio) : _price - (math.abs(_price - _stop) * rr_ratio)
-    
-    // Çizimler (Sabitlenir, Silinmez)
-    line.new(bar_index[p_len], _price, bar_index, _price, color=_c, width=2)
-    line.new(bar_index, _tp, bar_index + 5, _tp, color=color.green, width=2)
-    label.new(bar_index[p_len], _price, _is_long ? "LONG" : "SHORT", color=_c, textcolor=color.white)
-
-// --- Tetikleyiciler ---
 if not na(ph)
-    f_draw_trade(false, ph)
+    atr = ta.atr(14)
+    tp = ph - (atr * rr)
+    line.new(bar_index[p_len], ph, bar_index, ph, color=color.red, width=2)
+    label.new(bar_index[p_len], ph, "SHORT", color=color.red, textcolor=color.white)
+
 if not na(pl)
-    f_draw_trade(true, pl)
+    atr = ta.atr(14)
+    tp = pl + (atr * rr)
+    line.new(bar_index[p_len], pl, bar_index, pl, color=color.blue, width=2)
+    label.new(bar_index[p_len], pl, "LONG", color=color.blue, textcolor=color.white)
