@@ -1,0 +1,61 @@
+// © 2025 Nexus Macro Strategy (Backtest Engine v0.0.1)
+// @version=6
+strategy("Nexus Macro Strategy [v0.0.1]", 
+     shorttitle="NMS_v0.0.1", 
+     overlay=true, 
+     initial_capital=10000, 
+     default_qty_type=strategy.percent_of_equity, 
+     default_qty_value=10, 
+     commission_type=strategy.commission.percent, 
+     commission_value=0.075)
+
+// =============================================================================
+// ⚙️ STRATEJİ AYARLARI
+// =============================================================================
+var G1 = "Sinyal Ayarları"
+int pivot_len = input.int(15, "Pivot Hassasiyeti", minval=1, group=G1)
+
+var G2 = "Risk Yönetimi"
+float rr_ratio = input.float(2.0, "Hedef Kar (Risk/Ödül)", minval=0.1, group=G2)
+float risk_per_trade = input.float(1.0, "İşlem Başına Risk (%)", minval=0.1, group=G2)
+
+// =============================================================================
+// 🔍 ANALİZ MANTIĞI
+// =============================================================================
+// İndikatörümüzle aynı mantık: Pivot High ve Pivot Low noktalarını buluyoruz.
+float ph = ta.pivothigh(high, pivot_len, pivot_len)
+float pl = ta.pivotlow(low, pivot_len, pivot_len)
+float atr = ta.atr(14)
+
+// =============================================================================
+// 📈 İŞLEM KURALLARI (ENTRY / EXIT)
+// =============================================================================
+
+// --- SHORT (SAT) KURGUSU ---
+if not na(ph)
+    float stopLoss = ph
+    float entry    = ph - (atr * 0.5)
+    float distance = math.abs(stopLoss - entry)
+    float takeProfit = entry - (distance * rr_ratio)
+    
+    // İşleme Giriş: Limit emir kullanarak indikatörün ENTRY çizgisine göre girer.
+    strategy.entry("Short", strategy.short, limit=entry, comment="Short_Entry")
+    // Çıkış Koşulları: SL ve TP noktaları indikatör seviyeleriyle aynıdır.
+    strategy.exit("Short Exit", "Short", stop=stopLoss, limit=takeProfit, comment_loss="SL", comment_profit="TP")
+
+// --- LONG (AL) KURGUSU ---
+if not na(pl)
+    float stopLoss = pl
+    float entry    = pl + (atr * 0.5)
+    float distance = math.abs(entry - stopLoss)
+    float takeProfit = entry + (distance * rr_ratio)
+    
+    strategy.entry("Long", strategy.long, limit=entry, comment="Long_Entry")
+    strategy.exit("Long Exit", "Long", stop=stopLoss, limit=takeProfit, comment_loss="SL", comment_profit="TP")
+
+// =============================================================================
+// 🎨 GÖRSEL DOLGU (Strateji Testini Kolaylaştırmak İçin)
+// =============================================================================
+// Strateji çalışırken arka planda Pivot noktalarını işaretleyelim ki neden girdiğini görelim.
+plotshape(ph, style=shape.triangledown, location=location.abovebar, color=color.red, size=size.tiny, title="Pivot High")
+plotshape(pl, style=shape.triangleup, location=location.belowbar, color=color.green, size=size.tiny, title="Pivot Low")
