@@ -2,73 +2,102 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Nexus Terminal | Azmi Sahin Finance</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Trading Terminal | Azmi Sahin Finance</title>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #0a0e12; color: #fff; margin: 0; padding: 20px; }
-        .header { text-align: center; padding: 20px; }
-        /* Grid sistemini düzelttik: Daha büyük ve yan yana 2 tane */
-        .market-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); 
-            gap: 30px; 
-            margin-top: 20px; 
+        :root { --bg: #0a0e12; --border: #2a2e39; --header: #131722; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--bg); font-family: 'Inter', sans-serif; overflow: hidden; }
+        
+        /* Dashboard Grid Yapısı */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 5px;
+            width: 100vw;
+            height: 92vh; /* Üst başlık için pay bırakıldı */
+            padding: 5px;
+            box-sizing: border-box;
         }
-        .chart-card { 
-            background: #131722; 
-            border-radius: 12px; 
-            padding: 10px; 
-            border: 1px solid #2a2e39; 
-            height: 500px; /* Yükseklik arttırıldı */
+
+        .header {
+            height: 8vh;
+            background: var(--header);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border);
         }
-        .chart-title { font-size: 1.2em; padding: 10px; color: #58a6ff; font-weight: bold; }
-        .footer { margin-top: 50px; text-align: center; color: #848e9c; font-size: 0.9em; }
+
+        .header h1 { color: #58a6ff; font-size: 1.2rem; margin: 0; }
+        .header p { color: #848e9c; font-size: 0.8rem; margin: 0; }
+
+        .chart-container {
+            background: var(--header);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        /* Mobil Uyum: Ekran küçükse alt alta diz */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+                overflow-y: auto;
+                height: auto;
+            }
+            .chart-container { height: 400px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Nexus Algorithmic Trading Terminal</h1>
-    <p>Market Analiz Platformu (BIST, NASDAQ, CRYPTO)</p>
-</div>
-
-<div class="market-grid">
-    <div class="chart-card">
-        <div class="chart-title">🇹🇷 Borsa İstanbul (THYAO)</div>
-        <div id="chart_1" style="height: 440px;"></div>
+    <div>
+        <h1>NEXUS TERMINAL <span style="color:#238636; font-size: 0.7rem;">LIVE</span></h1>
     </div>
-    <div class="chart-card">
-        <div class="chart-title">🇺🇸 NVIDIA (NVDA)</div>
-        <div id="chart_2" style="height: 440px;"></div>
-    </div>
-    <div class="chart-card">
-        <div class="chart-title">₿ Bitcoin (BTC/USDT)</div>
-        <div id="chart_3" style="height: 440px;"></div>
-    </div>
-    <div class="chart-card">
-        <div class="chart-title">📀 Altın (XAU/USD)</div>
-        <div id="chart_4" style="height: 440px;"></div>
+    <div style="text-align: right;">
+        <p>Market Analysis Suite v1.0</p>
+        <p>© Azmi Sahin Finance</p>
     </div>
 </div>
 
-<div class="footer">
-    <p>© 2025 Azmi Sahin Finance | Apache 2.0 License</p>
+<div class="dashboard">
+    <div class="chart-container" id="chart_nvda"></div>
+    <div class="chart-container" id="chart_btc"></div>
+    <div class="chart-container" id="chart_gold"></div>
+    <div class="chart-container" id="chart_eth"></div>
 </div>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <script type="text/javascript">
-    function loadChart(id, symbol) {
+    function createWidget(container, symbol) {
         new TradingView.widget({
-            "width": "100%", "height": "100%", "symbol": symbol,
-            "interval": "D", "timezone": "Etc/UTC", "theme": "dark",
-            "style": "1", "locale": "tr", "toolbar_bg": "#f1f3f6",
-            "enable_publishing": false, "hide_top_toolbar": false,
-            "container_id": id
+            "autosize": true,
+            "symbol": symbol,
+            "interval": "D",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "tr",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_side_toolbar": false,
+            "allow_symbol_change": true,
+            "details": true,
+            "hotlist": true,
+            "calendar": true,
+            "container_id": container
         });
     }
-    loadChart("chart_1", "BIST:THYAO");
-    loadChart("chart_2", "NASDAQ:NVDA");
-    loadChart("chart_3", "BINANCE:BTCUSDT");
-    loadChart("chart_4", "TVC:GOLD");
+
+    // Grafiklerin Yüklenmesi
+    createWidget("chart_nvda", "NASDAQ:NVDA");
+    createWidget("chart_btc", "BINANCE:BTCUSDT");
+    createWidget("chart_gold", "TVC:GOLD");
+    createWidget("chart_eth", "BINANCE:ETHUSDT");
 </script>
+
 </body>
 </html>
